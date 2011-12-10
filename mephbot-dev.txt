@@ -1,0 +1,1128 @@
+Mephbot development log
+Copyright (c) 2002 by Mike Gogulski
+
+Version 0.91 Changes
+
+(hopefully) squashed a crashy bug in AutomationThreadProc
+
+fixed weapon switch bug introduced in 0.9
+
+packetized weapon switch
+
+FINALLY (I hope and pray) fixed the mana recovery bug which caused people
+to stop in the middle of teleporting to Meph, only to get thrashed by the
+Council.
+
+-------------------------------------------------------------------------------
+Version 0.91 TODO
+
+===========================
+  Fixes/Improvements TODO
+===========================
+
+configurable vertical offset for mouse clicks (only one left!!!)
+
+configurable potion buy delay (may no longer be necessary)
+
+Account for changes to fast cast % on weapon switch
+
+For spell casting, we have to select the skill if it's not selected, then wait
+for the server to confirm that we have that skill selected BEFORE we send the
+cast packet.  The time that we need to wait is approximately equal to the 
+average round-trip ping time from client to server, plus a small pad to account
+for processing/queueing delay at each end.  THIS IS ANNOYINGLY DIFFICULT TO
+CODE.
+
+Hmmm... we could make a STATE_CAST to which we pass a spell name, hand, X/Y,
+next state, and Tick1 value to restore...
+
+Timing for lightning, chain lightning, and inferno is currently wrong since 
+these depend on IAS, not Fast Cast (noted in mephbot.txt)
+
+Use BNHackit to automate out-of-game control functions once it's released
+
+=====================
+  New Features TODO
+=====================
+
+Switch the whole damn thing to using Gameinfo's memory hooks for game data
+
+Replace AutoIT wrapper script with a C++/MFC program
+	(IN PROGRESS)
+
+Packet debug to screen currently causes crashes (need to handle extra-long
+lines better)
+	(I DO NOT INTEND TO FIX THIS)
+
+Handle gold inventory full condition (see IPB)
+	(I DO NOT INTEND TO IMPLEMENT THIS)
+
+Game difficulty selection
+	(I DO NOT INTEND TO IMPLEMENT THIS)
+
+Use fastwp 1.2 to get to act 3 wp 1 at first game join if not in kurast docks, then quit
+	maybe just use excerpt of gayak's code rather than the whole module?
+	(I DO NOT INTEND TO IMPLEMENT THIS UNTIL AFTER 1.10 IF NOT PATCHED)
+
+add support for off-realm games (BNETD, peer-peer)
+	(I DO NOT INTEND TO IMPLEMENT THIS)
+
+Merc support - see FallNAngel's IPB Code
+	requires: asheara visit, death detection, health monitor, feed potion
+	hmmm.... mercs die pretty quick... mostly pointless...
+	(I DO NOT INTEND TO IMPLEMENT THIS)
+
+after one char's inventory is full, start running another char
+	(I DO NOT INTEND TO IMPLEMENT THIS) (write your own batch file)
+
+alternating attack sequence, say to let the user configure two spells (orb and
+hydra for example) to alternate between
+	(I DO NOT INTEND TO IMPLEMENT THIS)
+
+fully user-configurable attack sequence (impossible, i say)
+	(I DO NOT INTEND TO IMPLEMENT THIS)
+
+per-character configuration in INI for all values
+	(I DO NOT INTEND TO IMPLEMENT THIS)
+
+=====================
+  External Projects
+=====================
+
+Guillaume's installer/configurator
+
+Something like IPB watcher to replace/augment overheadinfo()
+
+Sharantyr's ChangeChar when inv full (should be integrated?)
+
+-------------------------------------------------------------------------------
+Version 0.9 Changes
+
+We now move ALL unid'd items to stash AND cube, removed mover.d2h from ZIP
+	CUBE MUST BE IN STASH!!! (largest items are moved first)
+
+Spell casting is now visible
+
+Fixed erroneous deletion of repair trigger in 0.8 (oops!)
+
+We now support up to 8 precasts
+
+configurable "dodging on/off" parameter in INI
+
+Changed "/" to VK_DIVIDE in key sending routines... Hopefully this fixes the
+problems experienced by users with non-US keyboards.
+
+We should now select and buy only the best of Ormus's healing potions
+
+Increased potion buy delay... should fix some people who were failing to buy
+potions at all
+
+Packetized character resurrection and corpse pickup functions.  Removed
+tr.d2h from distribution
+
+Added user-configurable %life at which to drink healing potion
+
+Added configurable option to keep running after inventory full
+
+Eliminated all mouse clicks from wrapper script
+
+Added CriticalSection checks around linked list operations, which should
+eliminate some crashes
+
+Cleaned up poor memory management in automation.cpp
+
+We're now using dClick in d2h module as well as wrapper
+
+eliminated auto-minimize on d2hackit startup (let user determine when instead)
+
+moved maphack path-building later in run to prevent crashes in DrawAutomapAct()
+
+Cleaned up some debugging information, moved things to proper debug levels
+
+On game join, we now reset the timer in wrapper to 0.  This helps ensure that
+once a game starts to actually be created, we don't abort it prematurely.
+
+-------------------------------------------------------------------------------
+Version 0.8 Changes
+
+FIRST GENERAL RELEASE (bugfixes only)
+
+Added readme.txt with FAQ and other info to distribution
+
+Fixed a divide-by-zero error in STATE_TELEPORT_TO_MEPH that could be triggered
+if MaxMP is unset.
+
+Removed default protection spells from d2h module to avoid errors with people
+who only configured 0-2 protection spells.
+
+Fixed numerous flaws in my "98% crash-free" pickit 0.86x.
+
+We now correctly report game started in wrong act rather than inventory full.
+
+We now recover mana in a separate state to avoid stopping in the middle of 
+the teleport to meph sequence.
+
+Eliminated gt.d2h from distribution.  Internalized potion-drinking and 
+triggers formerly handled by gt and tr.  Should fix a bug reported where only
+potions in belt slot 1 were being used.
+
+CreateStairsPath() now uses Durance 2 waypoint location rather than player
+location to work properly all the time.  This fixes a bug which was causing
+an abort in about 15% of games.
+
+MaxHP and MaxMP settings are now more reliable, which should result in 
+fewer unnecessary chickens.
+
+Increased minimum length of game names... should result in fewer "A game with
+that name already exists" failures.
+
+We're now dodging only when Meph casts his Ice Ball attack.  Even though
+dodging still isn't perfect, this should result in faster kills overall.
+
+Corrected a small bug in STATE_CAST_PROTECTION timing which *may* result in
+more reliable precasting.
+
+-------------------------------------------------------------------------------
+Version 0.7 Changes
+
+SECOND BETA RELEASE
+
+Improved stairs-finding using Dijkstra's shortest-path algorithm
+
+Protection and Attack Skills (except static and teleport) settable in INI
+
+We now support EVERY Sorceress skill including "Normal Attack" and throwing
+attacks.  Chain Lightning, Lightning, and Inferno, however, have timing
+problems and are NOT recommended.
+
+Protection Spell precast routine should now be 98% reliable
+
+Eliminated ExitProcess() from code.  This was causing crashes on some systems
+(Win98 in particular).
+
+Dodging: Implemented Gayak's contributed Telesafe() algorithm, which results in
+fewer player deaths at some small expense in average run speed. (Thanks Gayak!)
+
+Fixed brain-damaged TeleportAway() algorithm.
+
+Incorporated my own hacked-up version of Pickit 0.86b (pickit 0.86x).  Should
+be 98% crash-free.
+
+Fixed broken pickit HTML header file
+
+Eliminated DeltaTeleport and MaxDistFromStairs user options (hard-coded to 40)
+
+Eliminated "cast during teleport" feature (useless)
+
+Eliminated MaxTryRestart user option (no longer needed)
+
+Removed all references to AutoIT DLL and #defines for USE_AUTOIT
+
+Removed all references to TextDisplay.cpp
+
+Fixed flag file deletion in wrapper script
+
+Eliminated chicken sound (*sniff!*)
+
+We now support healing potions other than supers (for norm & nightmare)
+
+Changed chat socket/game socket detection to look for D2 TCP 4000 socket
+instead of b.net 6112 sockets... should be more compatible with b.net chat bots
+
+Switched all item drop parsing from Shopbot code to PKTK code (sorry, Cigamit)
+
+Eliminated MaxTickRepair and RepairGameNumber options (durability check works)
+
+We won't buy potions if we already have 12 or more in belt
+
+Fixed a bug in Meph range detection that kept us too close to him
+
+We now calculate spell delays based on fast cast % and skill data table
+(no more DelayCast* config in INI)
+
+Improved how we handle logging to file.  We only fopen() once, which should
+mean less disk I/O and therefore less lag on slower systems.
+
+Eliminated -direct -txt as default options.  D2Accelerator users will want
+to add these parameters back into D2Parameter= in the [_expert_] section
+of mephbot.ini
+
+The bot will now stop immediately (and erroneously report inventory full) if
+it's started someplace other than Act 3, Kurast Docks.
+
+-------------------------------------------------------------------------------
+
+Version 0.6 Changes
+
+FIRST BETA RELEASE
+
+Mephbot now runs minimized!
+
+The AutoIT DLL is now no longer required
+
+Faster stairs-finding algorithm thanks to Gayak
+
+We now only launch a repair game when an equipped item is damaged to
+10% of its durability
+
+StairsObjID detection is now 100% deterministic thanks to Gayak
+
+Eliminated keystrokes and mouseclicks from nearly all in-game functions
+
+Fixed string-printing bug which was causing occasional assertion failures.
+
+Fixed much programming stupidity
+
+We now simply quit altogether when we have a full player inventory
+
+HUGE amounts of new debugging output is available
+
+Moved some game startup stuff out of OnGameJoin into STATE_GAME_STARTED
+
+Added packet-level debugging from sniffer.d2h and pktident.d2h
+
+made MephWeaponSwitchHealth a percentage in INI
+
+moved "tr" configuration commands into tr.ini
+
+Fixed player death detection
+
+Ultra-agressive chickening with ExitProcess()
+
+Improved logic that determines if we're near the stairs
+
+Eliminated my quaffer.d2h module from the distribution
+
+Changed pickit.ini to no longer pick up any potions (we don't need them)
+
+We're now using herzog_zwei's mover.d2h to move 1x1 items to stash
+	(except small charms)
+
+We visit stash only every (user configurable number of) games
+
+Added tr.d2h filters to ensure we're not seeing/picking up potions/bolts/etc.
+
+Increased potion-quaff-at-resurrection number from 40 to 56 to be DAMN SURE
+
+Fixed handling of player death simultaneous to Meph death
+
+Fixed a bug in TeleportRandomly() that wasn't properly resetting the random
+vectors list
+
+We now load tr before pickit to ensure that tr's "hide" function works
+
+We now calculate DeltaTeleportAway, and eliminated user config
+
+Eliminated DelayTeleport (== DelayCastQuickSpell)
+
+Localized as many variables as possible for more thread-safe operation
+
+Added user option to move D2 window into top-left corner of screen
+
+Added user option to disable debug to screen but still debug to file
+
+Added support for multiple debug levels/flags
+
+Moved a bunch of utility and logging functions off into their own .cpp files
+
+We will chicken out at HP 40% and MP 10% (energy shield about to fall)
+
+After taking stairs to durance 3, we will wait until mana >  70% before 
+beginning the teleport to meph run
+
+Added a sanity check to STATE_START_NEW_GAME that makes sure we have two
+TCP/IP connections to battle.net open before sending start game commands
+
+Made hp/mp display percentages rather than absolutes when maxima are available
+
+Fixed overzealous window killing in wrapper script which prevented Diablo 
+from writing debug information to its logfile
+
+We now play a remarkably amusing WAV file after chickening out
+
+No more skill hotkey configuration. We select skills with packets now
+NOTE: Skills are not configuratble in this releast
+
+We do gold deposit all with packets now
+
+Added a chicken counter (we them count before they're hatched)
+
+Fixed a gold deposit bug where we were closing the stash too early
+
+Added better logging in the wrapper script
+
+Suggested fixes for memory consumption and crash protection to Gayak
+for use in pickit 0.86b, which he implemented, and we now include
+
+Fixed bad math in TeleportToward() and TeleportAway()
+
+We build all packets the same way in all functions now
+
+Now using 0x04 "run to entity, click entity" packet in takestairs()
+
+Fixed an OverheadInfo() bug which may have caused odd game behavior
+
+Weapon switch should now be 100% reliable, as we're tracking weapon state
+with packet 0x9d17 messages. We're storing weapon state info and primary
+weapon selection in the INI for correct weapon selection on D2 restart
+after chicken or crash 
+
+We now quit game without packets, keystrokes or mouseclicks, thanks to
+D2ExitGame() from Mousepad's maphack.
+
+Got rid of "mepbot-killme.tmp" in favor of D2ExitGame(0)
+
+We now chicken by calling D2ExitGame(0)... much more direct than the old 
+0x66 method.
+
+Replaced pause packets/keystrokes with pause messages in the serialization
+queue
+
+We now join random channel and set away message only when the module first
+starts up.
+
+Fixed a bug in GetCurrentLevel() which caused crashes when we asked for 
+the current level before D2 had populated its unit structures fully
+
+We now track skill selection so we don't have to reselect teleport a thousand
+times
+
+We now auto-drink any health potion which falls to inventory using packets.
+Should prevent potions from filling up inventory on resurrection after death.
+
+-------------------------------------------------------------------------------
+Version 0.5 Changes
+
+SECOND ALPHA RELEASE
+
+Removed OnCommandToggle and OnCommandReload
+
+Added debug logging for the AUT script
+
+we now do a weapon reset before all aborts (except when wrapper kills D2)
+
+more debugging output in mephbot.d2h
+
+added life and mana readout to overhead status
+
+some code maintainability improvements
+
+added explicit length declaration for hotkey strings
+
+removed default declarations for hotkey strings... this was serving to conceal
+programming errors
+
+Fixed major bugs in STATE_ATTACK_MEPH... we weren't resetting
+HotKeyPrimaryLeftAttack at all... now we do.  Also, we're now doing spell
+casting in the correct order and with sensible use of the timers and delays.
+
+added a missing colon after DeleteInGameFile: label in autoit script
+
+we now reset weapon IMMEDIATELY after meph dies
+
+changed strings of spaces to {SPACE x}
+
+moved if(fFunction) { Function(); } conditionals into functions
+
+-------------------------------------------------------------------------------
+Version 0.4 Changes
+
+FIRST ALPHA RELEASE
+
+Merged the two INI files
+
+Made sound on/off a user option
+
+Support Windowed operation
+
+User option for weapon switch
+
+Added checks to AUT and D2H to delete mephbot-killme.tmp at startup
+
+Switched thunderstorm with energy shield in default precast sequence
+
+Made away message user configurable
+
+Made OverHeadInfo() a configurable option
+
+If Meph's health is less than 50% we now cast NoDelayRightAttack
+instead of static field after every main attack
+
+Added configurable delay after taking stairs and waypoint (DelayBeforePrecast)
+
+Made pickup time configurable from INI (DelayPickup)
+
+Added check to restart everything if no game started within 60 seconds
+
+Fixed a bug in the AutoIT script where we were checking game state every
+millisecond instead of every second
+
+We now get mephbotdir value from AutoIt environment, no user config needed
+
+We now unload pickit at game start, load it pre-enabled on entering Durance 3
+
+Added open stash/deposit gold function
+
+Moved "gt maxhp" setting to after casting first protection spells... should
+now be 100% accurate
+
+Added ChickenHPPercent setting to kill client if life below thresshold.
+
+incorporated repair.d2h functions into this module
+
+incorporated buyer.d2h potion buy function into mephbot.d2h
+
+Added flag check to make sure we're not doing runs with full inventory
+
+Statistics now persist across game crash/restart, get logged to mephbot-stats.ini
+
+Fixed buggy weapon switch code (changed a while to an if)
+
+-------------------------------------------------------------------------------
+version 0.4 Bug List
+
+Player death detection isn't working quite right
+	SHOULD no longer be an issue, since we added 0x95 chicken code we should
+	never die
+
+-------------------------------------------------------------------------------
+version 0.3 changes/fixed
+
+having "gt stop" so close to game exit may cause a crash
+	increased default game exit timer to 3 seconds
+
+need to have d2h signal aut that we're in game
+	also signal a panic somehow, like if TickGame > MaxTickGame * 2
+	(though this would cover up bugs)
+	mephbot.aut needs a timer to determine
+		if timer > x and notexist (file that says .d2h is in game)
+			kill diablo, restart
+
+Hratli game exit not reliable
+	FIXED
+
+game exit when can't find stairs broken
+	FIXED
+
+RandString() producing hi-bit chars
+	FIXED, added null-termination
+
+TakeStairs algorithm
+	DelayTakeStairs = 8 may be min until we fix the detection algorithm
+
+Sometimes after death we end up with an inventory full of potions
+	changed potion-quaff qty to 40
+	FIXED, but... death detection not exactly right... hmmm...
+	REFINED - we now do "tr potion h" as well as "          [1234]" x 32/40
+
+handle disconnect from server/relogon to bnet
+	NEED a wrapper like infinite pindlebot's
+	DONE -- testing
+	
+-------------------------------------------------------------------------------
+version 0.2 features added
+
+make Overhead() use a GameSendPacketToGame to avoid flooding the server
+	DONE!!!
+
+Play a sound when Inventory full and waiting for human input
+	DONE
+
+make static field not part of shoot.d2h
+	DONE
+
+Hratli repair visit
+	DONE
+
+cast nova while teleporting through durance 2
+	DONE -- but slows down teleport to stairs by 100%
+
+make TakeStairs more reliable
+	DONE
+
+.ini file handling
+	DONE
+
+dprintf()
+	DONE
+
+automatic set of gt maxhp and maxmp
+	DONE
+
+weapon switch
+	DONE
+
+quaff potion inventory after resurrection
+	DONE
+
+discover stairs object ID dynamically
+	DONE, sorta
+
+Fix distancetostairs algorithm
+	DONE
+
+TeleportToStairs
+	location in front of stairs is actually MORE than we get from maphack
+	adjusted +3, looks good!
+	DONE
+
+channel/away management
+	DONE
+
+stats during chat
+	DONE
+
+convert PathToMeph to Teleport() format
+	DONE
+
+Fix ormus vist
+	DONE
+
+bias teleport away from meph toward back of durance rather than toward council
+	find a point near the center chest (4485, 1F82)
+	if I'm farther than 30, 30 from there, teleport there and continue
+	DONE
+
+-------------------------------------------------------------------------------
+NOTES
+-------------------------------------------------------------------------------
+Killing Mephisto:
+
+51	"object" info (shows up in gameinfo as "object" unit type)
+56	monster spawn (shows up in gameinfo as "monster" unit type)
+
+RECV:  51 02 e6 00 00 00 1b 01 af 44 02 1a 00 00  (null)  00000000D0000
+
+51 02		(monster spawn)
+e6 00 00 00 	DWORD monsterID
+1b 01 af	unknown (monster type ID?)
+af 44		WORD PosX?
+02 1a		WORD PosY?
+00 00		trailer?
+
+13	monster update
+12 01 	moster update
+68	monster move
+69	monster died
+6c	monster attack
+
+
+I need to:
+
+catch the 56 packets looking for mephisto's generation
+	look for his popID of F2
+	grab the MonID DWORD from aPacket[1-4]
+catch the 68 packets for meph to track his position
+catch the 03 packets to track my position (? -- maybe from playerinfostruct)
+
+if i'm closer than MIN or farther than MAX
+	teleport closer/farther
+
+once we get a 69 for meph's ID, teleport to his death location and wait 2 secs
+	if the 69 has PosX == PosY == 0, it's just a notification , wait for 
+		values
+
+quit game
+
+
+Monster move (68)
+                     MonID------ XX PosX- PosY-
+01:26:42p  RECV:  68 8d 01 00 00 00 e5 1d c8 14 00 01 00 00 00 01 00 0d 00 05  (null)  0000000000000000000
+
+Deseis first mentioned
+spawn packet
+                     MonsterID-- PopID PosX- PosY-
+01:03:38p  RECV:  56 85 01 00 00 38 01 5f 1e 5b 14 80 01 01 00 ff ff ff ff e2 ff 00 00 00 00 00 00 00 00 00 00 02 02 00 00 00 00 05 1e 16 00 00 00 00 00 00  (null)  000000000000000000000000000000000000000000000
+
+these reference the monster ID but i don't think we need them
+
+01:03:38p  RECV:  14 01 85 01 00 00 31 00 00 00 1c 00 00 00 a9 00 4b 00  (null)  000000000000000K0
+01:03:38p  RECV:  13 01 85 01 00 00 69 00 00 00 02 00 00 00  (null)  00000i0000000
+
+
+01:07:15p  RECV:  4c 01 85 01 00 00 d3 00 02 00 01 00 00 00 00 00  (null)  000000000000000
+
+
+deseis dies
+
+corpse drop
+                                    PosX  PosY
+01:07:15p  RECV:  69 85 01 00 00 06 7b 1e 40 14 36 00  (null)  00000000000
+
+death notice
+
+01:07:15p  RECV:  12 01 85 01 00 00 00 08 00 00 00 00 02 00 00 00 00 00 00 02 00 00 00 00 00 00  (null)  0000000000000000000000000
+01:07:15p  RECV:  69 85 01 00 00 08 00 00 00 00 3d 00  (null)  00000000000
+
+this is a death notification(?)
+
+01:07:15p  RECV:  12 01 85 01 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 00 00 00 00 00 00  (null)  0000000000000000000000000
+01:07:16p  RECV:  12 00 01 00 00 00 00 00 00 00 00 00 00 00 c0 03 00 00 00 02 00 00 00 00 00 00  (null)  0000000000000000000000000
+01:07:16p  RECV:  69 85 01 00 00 09 7b 1e 40 14 3d 00  (null)  00000000000
+
+
+deseis is dead 
+
+
+---------------------
+
+begin from stash 
+02:13:07a  SENT: 03 22 14 d6 13
+02:13:08a  SENT: 03 24 14 da 13
+02:13:08a  SENT: 03 26 14 dc 13
+02:13:08a  SENT: 03 28 14 de 13
+02:13:08a  SENT: 03 2b 14 df 13
+02:13:09a  SENT: 03 2d 14 df 13
+02:13:09a  SENT: 03 2b 14 df 13
+02:13:09a  SENT: 03 28 14 e0 13
+02:13:10a  SENT: 03 32 14 de 13
+02:13:10a  SENT: 03 37 14 de 13
+02:13:10a  SENT: 03 3b 14 de 13
+02:13:10a  SENT: 03 42 14 de 13
+02:13:11a  SENT: 03 46 14 de 13
+02:13:11a  SENT: 03 4a 14 de 13
+02:13:11a  SENT: 03 4f 14 de 13
+02:13:12a  SENT: 03 53 14 de 13
+02:13:12a  SENT: 03 57 14 df 13
+02:13:12a  SENT: 03 5b 14 df 13
+02:13:12a  SENT: 03 5f 14 dd 13
+02:13:13a  SENT: 03 5f 14 d9 13
+02:13:13a  SENT: 03 5c 14 d0 13
+02:13:13a  SENT: 03 5c 14 d0 13
+02:13:14a  SENT: 03 62 14 cf 13
+02:13:14a  SENT: 03 67 14 cd 13
+02:13:14a  SENT: 03 6a 14 ca 13
+02:13:14a  SENT: 03 67 14 c4 13
+02:13:15a  SENT: 03 65 14 bd 13
+02:13:15a  SENT: 03 65 14 bb 13
+02:13:15a  SENT: 03 67 14 b5 13
+02:13:15a  SENT: 03 65 14 b0 13
+02:13:16a  SENT: 03 65 14 b1 13
+02:13:16a  SENT: 03 64 14 af 13
+02:13:16a  SENT: 03 62 14 af 13
+arrived at hratli 
+
+begin from stash 
+02:13:07a  SENT: 03 22 14 d6 13
+02:13:08a  SENT: 03 24 14 da 13
+02:13:08a  SENT: 03 2b 14 df 13
+02:13:09a  SENT: 03 2d 14 df 13
+02:13:09a  SENT: 03 28 14 e0 13
+02:13:10a  SENT: 03 32 14 de 13
+02:13:10a  SENT: 03 42 14 de 13
+02:13:11a  SENT: 03 46 14 de 13
+02:13:11a  SENT: 03 4f 14 de 13
+02:13:12a  SENT: 03 53 14 de 13
+02:13:12a  SENT: 03 5f 14 dd 13
+02:13:13a  SENT: 03 5f 14 d9 13
+02:13:13a  SENT: 03 5c 14 d0 13
+02:13:14a  SENT: 03 62 14 cf 13
+02:13:14a  SENT: 03 67 14 c4 13
+02:13:15a  SENT: 03 65 14 bd 13
+02:13:15a  SENT: 03 65 14 b0 13
+02:13:16a  SENT: 03 65 14 b1 13
+02:13:16a  SENT: 03 62 14 af 13
+arrived at hratli 
+
+{0x1422, 0x13d6}
+{0x1424, 0x13da}
+{0x142b, 0x13df}
+{0x142d, 0x13df}
+{0x1428, 0x13e0}
+{0x1432, 0x13de}
+{0x1442, 0x13de}
+{0x1446, 0x13de}
+{0x144f, 0x13de}
+{0x1453, 0x13de}
+{0x145f, 0x13dd}
+{0x145f, 0x13d9}
+{0x145c, 0x13d0}
+{0x1462, 0x13cf}
+{0x1467, 0x13c4}
+{0x1465, 0x13bd}
+{0x1465, 0x13b0}
+{0x1465, 0x13b1}
+{0x1462, 0x13af}
+
+-----------------------------------------------------------------
+03:47:15p  RECV:  51 02 04 00 00 00 76 01 05 14 09 14 00 00
+03:47:15p  RECV:  51 02 03 00 00 00 72 01 08 14 1e 14 00 00
+03:47:15p  RECV:  51 02 02 00 00 00 72 01 1c 14 2c 14 00 00
+03:47:15p  RECV:  51 02 01 00 00 00 7a 01 02 14 2d 14 00 00
+
+game started 
+take waypoint
+arrived durance 2 
+03:48:00p  RECV:  15 00 01 00 00 00 a4 44 87 19 01
+03:48:00p  SENT: 0f 97 44 93 19 
+
+taking stairs down to durance 3
+03:48:09p  SENT: 13 05 00 00 00 01 00 00 00 
+03:48:09p  RECV:  0d 00 01 00 00 00 01 15 45 5b 1f 00 59
+03:48:09p  RECV:  15 00 01 00 00 00 15 45 56 1f 01
+
+taking stairs up 
+03:48:13p  SENT: 13 05 00 00 00 02 00 00 00 
+03:48:13p  RECV:  0d 00 01 00 00 00 01 a9 44 82 19 00 59
+03:48:24p  SENT: 03 2e 45 e5 19 
+
+taking stairs up to durance 1 
+03:48:30p  SENT: 13 05 00 00 00 03 00 00 00 
+03:48:30p  RECV:  0d 00 01 00 00 00 01 60 45 11 14 00 59
+03:48:30p  RECV:  15 00 01 00 00 00 60 45 0c 14 01
+
+taking stairs down to durance 2 
+03:48:36p  SENT: 13 05 00 00 00 04 00 00 00 
+03:48:36p  RECV:  0d 00 01 00 00 00 01 2e 45 e8 19 00 59
+03:48:36p  RECV:  15 00 01 00 00 00 2e 45 e3 19 01
+
+durance 2 stairs down	01
+durance 3 stairs up	02
+durance 2 stairs up	03
+durance 1 stairs down	04
+
+-------------------------------
+monster health
+
+0c 01 DWORD MonID 13 xx counter
+
+00	0c
+01	01
+02	MonID
+03	MonID
+04	MonID
+05	MonID
+06	13 (?) (update type?)
+07	counter LSB?
+08	counter MSB?
+
+--------------------------------
+changing program states in response to what's recently posted to the logfile
+(This is an interesting idea which doesn't work because D2 posts to its 
+logfile only every 10 seconds or so)
+
+after selecting character
+11:05:42.596  [D2MULTI]  Start entering at 256824283
+we know we're in chat when we see
+***11:05:42.947  [D2MULTI]  Finish entering at 256824634.  Elapsed: 351
+
+after starting game
+11:06:16.635  [D2MULTI]  Start closing at 256858322
+11:06:16.635  [D2MULTI]  Finish closing at 256858322.  Elapsed: 0
+11:06:16.795  ENG is locale
+11:06:18.768  [D2CLIENT]  Start entering at 256860455
+11:06:18.858  Opening GDI window at 800x600...
+11:06:19.109  [D2CLIENT]  Finish entering at 256860796.  Elapsed: 341
+11:06:19.679  Seed: 645755873
+
+
+after quit game
+11:07:06.777  [D2CLIENT]  Start closing at 256908464.
+11:07:06.977  game close start 256908665
+11:07:07.007  game close end 256908695
+11:07:07.007  [D2CLIENT]  Finish closing at 256908695.  Elapsed: 231
+11:07:07.068  Opening GDI window at 800x600...
+11:07:07.078  [D2MULTI]  Start entering at 256908765
+11:07:07.849  [D2MULTI]  Finish entering at 256909536.  Elapsed: 771
+
+after exiting to char selection
+11:07:38.643  [D2MULTI]  Start closing at 256940330
+11:07:38.653  [D2MULTI]  Finish closing at 256940340.  Elapsed: 10
+11:07:39.965  Freeing Realm List.
+
+we know we're in char selection when we see
+***11:07:39.965  Storing Realm List.
+
+after exit to login
+nothing
+
+after pressing battle.net button
+nothing
+
+after entering password
+***we know we're in char selection when we see
+11:09:19.488  Freeing Realm List.
+11:09:19.488  Storing Realm List.
+
+
+after connection interrupted
+11:12:29.631  [D2CLIENT]  Start closing at 257231319.
+11:12:38.013  game close start 257239701
+11:12:38.554  game close end 257240241
+***11:12:38.564  [D2CLIENT]  Finish closing at 257240251.  Elapsed: 8932
+11:12:38.624  Opening GDI window at 800x600...
+11:12:38.624  [D2MULTI]  Start entering at 257240312
+11:12:39.205  [D2MULTI]  Finish entering at 257240892.  Elapsed: 580
+(back to chat)
+
+
+-------------------------------------
+Durance dungeon level info (from LvlPrest.txt)
+
+these are the rooms with the stairs
+
+Name				Def	SizeX	SizeY	File1
+Act 3 - Mephisto Prev W		784	12	12	Act3/Travincal/MephWWarpU.ds1
+Act 3 - Mephisto Prev E		785	12	12	Act3/Travincal/MephEWarpU.ds1
+Act 3 - Mephisto Prev S		786	12	12	Act3/Travincal/MephSWarpU.ds1
+Act 3 - Mephisto Prev N		787	12	12	Act3/Travincal/MephNWarpU.ds1
+
+we care about:
+Act 3 - Mephisto Next W		788	12	12	Act3/Travincal/MephWWarpD.ds1
+Act 3 - Mephisto Next E		789	12	12	Act3/Travincal/MephEWarpD.ds1
+Act 3 - Mephisto Next S		790	12	12	Act3/Travincal/MephSWarpD.ds1
+Act 3 - Mephisto Next N		791	12	12	Act3/Travincal/MephNWarpD.ds1
+
+and not these
+Act 3 - Mephisto Complex	796	0	0	Act3/Travincal/MephComp.ds1
+Act 3 - Mephisto Waypoint W	792	12	12	Act3/Travincal/MephWWarp.ds1
+Act 3 - Mephisto Waypoint E	793	12	12	Act3/Travincal/MephEWarp.ds1
+Act 3 - Mephisto Waypoint S	794	12	12	Act3/Travincal/MephSWarp.ds1
+Act 3 - Mephisto Waypoint N	795	12	12	Act3/Travincal/MephNWarp.ds1
+
+---------------------------------------------------------------------------
+
+	what packet do we get when someone else does an overhead?
+	Chat-ovrhed PlayerID--- ?? ?? NULText------- NUL
+	26 05 00 00 0d 00 00 00 af 44 00 74 65 73 74 00  (null)  00000000D0test0
+	26 05 00 00 11 00 00 00 00 e0 00 74 65 73 74 00  (null)  0000000000test0
+
+
+****
+
+VK_LBUTTON: 0x01
+VK_RBUTTON: 0x02
+VK_CANCEL: 0x03
+VK_MBUTTON: 0x04
+VK_BACK: 0x08
+VK_TAB: 0x09
+VK_CLEAR: 0x0C
+VK_RETURN: 0x0D
+VK_SHIFT: 0x10
+VK_CONTROL: 0x11
+VK_MENU: 0x12
+VK_PAUSE: 0x13
+VK_CAPITAL: 0x14
+VK_ESCAPE: 0x1B
+VK_SPACE: 0x20
+VK_PRIOR: 0x21
+VK_NEXT: 0x22
+VK_END: 0x23
+VK_HOME: 0x24
+VK_LEFT: 0x25
+VK_UP: 0x26
+VK_RIGHT: 0x27
+VK_DOWN: 0x28
+VK_SELECT: 0x29
+VK_PRINT: 0x2A
+VK_EXECUTE: 0x2B
+VK_SNAPSHOT: 0x2C
+VK_INSERT: 0x2D
+VK_DELETE: 0x2E
+VK_HELP: 0x2F
+VK_0: 0x30
+VK_1: 0x31
+VK_2: 0x32
+VK_3: 0x33
+VK_4: 0x34
+VK_5: 0x35
+VK_6: 0x36
+VK_7: 0x37
+VK_8: 0x38
+VK_9: 0x39
+VK_A: 0x41
+VK_B: 0x42
+VK_C: 0x43
+VK_D: 0x44
+VK_E: 0x45
+VK_F: 0x46
+VK_G: 0x47
+VK_H: 0x48
+VK_I: 0x49
+VK_J: 0x4A
+VK_K: 0x4B
+VK_L: 0x4C
+VK_M: 0x4D
+VK_N: 0x4E
+VK_O: 0x4F
+VK_P: 0x50
+VK_Q: 0x51
+VK_R: 0x52
+VK_S: 0x53
+VK_T: 0x54
+VK_U: 0x55
+VK_V: 0x56
+VK_W: 0x57
+VK_X: 0x58
+VK_Y: 0x59
+VK_Z: 0x5A
+VK_LWIN: 0x5B
+VK_RWIN: 0x5C
+VK_APPS: 0x5D
+VK_NUMPAD0: 0x60
+VK_NUMPAD1: 0x61
+VK_NUMPAD2: 0x62
+VK_NUMPAD3: 0x63
+VK_NUMPAD4: 0x64
+VK_NUMPAD5: 0x65
+VK_NUMPAD6: 0x66
+VK_NUMPAD7: 0x67
+VK_NUMPAD8: 0x68
+VK_NUMPAD9: 0x69
+VK_MULTIPLY: 0x6A
+VK_ADD: 0x6B
+VK_SEPARATOR: 0x6C
+VK_SUBTRACT: 0x6D
+VK_DECIMAL: 0x6E
+VK_DIVIDE: 0x6F
+VK_F1: 0x70
+VK_F2: 0x71
+VK_F3: 0x72
+VK_F4: 0x73
+VK_F5: 0x74
+VK_F6: 0x75
+VK_F7: 0x76
+VK_F8: 0x77
+VK_F9: 0x78
+VK_F10: 0x79
+VK_F11: 0x7A
+VK_F12: 0x7B
+VK_F13: 0x7C
+VK_F14: 0x7D
+VK_F15: 0x7E
+VK_F16: 0x7F
+VK_F17: 0x80
+VK_F18: 0x81
+VK_F19: 0x82
+VK_F20: 0x83
+VK_F21: 0x84
+VK_F22: 0x85
+VK_F23: 0x86
+VK_F24: 0x87
+VK_NUMLOCK: 0x90
+VK_SCROLL: 0x91
+VK_PROCESSKEY: 0xE5
+VK_ATTN: 0xF6
+VK_CRSEL: 0xF7
+VK_EXSEL: 0xF8
+VK_EREOF: 0xF9
+VK_PLAY: 0xFA
+VK_ZOOM: 0xFB
+VK_NONAME: 0xFC
+VK_PA1: 0xFD
+VK_OEM_CLEAR: 0xFE
+
+----------------
+
+figuring out how much gold we have
+
+carrying 2732 gold, talking to ormus 
+						   XXXXX (carried)
+03:38:14a  RECV:  2a 00 09 6f 00 0d 7c ff ff ff ff ac 0a 00 00
+03:38:14a  RECV:  2a 00 09 6f 00 0d 7c ff ff ff ff ac 0a 00 00
+
+buy one hp5 for 450 gold 
+03:38:42a  RECV:  2a 00 09 6f 00 0d 7c ff ff ff ff ac 0a 00 00
+03:38:42a  RECV:  2a 00 09 6f 00 0d 7c ff ff ff ff ac 0a 00 00
+
+This is it right here!
+03:38:45a  RECV:  2a 04 00 6f 00 0d 7c 75 00 00 00 ea 08 00 00
+Transaction #75, new gold inv=8ea(2282)
+
+opening stash, depositing 2282 gold (142183 in stash already) 
+03:39:58a  SENT: 4f 14 00 00 00 ea 08 
+
+now i have 144465 in stash, talking to ormus again 
+03:40:19a  SENT: 4f 12 00 00 00 00 00 
+03:40:19a  SENT: 4f 12 00 00 00 00 00 
+03:40:29a  RECV:  2a 00 09 6f 00 0d 7c ff ff ff ff 00 00 00 00
+03:40:29a  RECV:  2a 00 09 6f 00 0d 7c ff ff ff ff 00 00 00 00
+
+start with 144465 stash, 0 inv, buy 1 hp5 @ 450 gold 
+03:40:55a  RECV:  2a 04 00 6f 00 0d 7c 76 00 00 00 00 00 00 00
+
+withdraw 144015 from stash (inv=0) 
+03:47:48a  SENT: 4f 13 00 02 00 8f 32 
+03:47:57a  SENT: 4f 12 00 00 00 00 00 
+
+get gold update with same amount 
+03:48:10a  RECV:  2a 00 09 6f 00 0d 7c ff ff ff ff 8f 32 02 00
+03:48:10a  RECV:  2a 00 09 6f 00 0d 7c ff ff ff ff 8f 32 02 00
+
+buy potion for 450. stash=0, inv = 144015 
+03:48:41a  RECV:  2a 04 00 6f 00 0d 7c 77 00 00 00 cd 30 02 00
+
+potion bought, stash=0, inv=143565 
+deposit 143500 to stash (65 left in inv) 
+03:49:35a  SENT: 4f 14 00 02 00 8c 30 
+03:49:38a  SENT: 4f 12 00 00 00 00 00 
+
+talk to ormus 
+03:49:48a  RECV:  2a 00 09 6f 00 0d 7c ff ff ff ff 41 00 00 00
+03:49:48a  RECV:  2a 00 09 6f 00 0d 7c ff ff ff ff 41 00 00 00
+
+buy pot for 450... start stash=143500, inv=65 
+03:50:05a  RECV:  2a 04 00 6f 00 0d 7c 78 00 00 00 00 00 00 00
+
+now stash=143115, inv = 0 
+
+
+
+received after buying potion
+12:42:41a  RECV:  1f 0f a1 a3 02 00
+represents gold in stash (+ inventory?)
+
+---------
+
+doing weapon switch verification better
+
+Logging Started: Sunday Aug 08/04/2002 11:57:43p 
+
+starting with scimitar in left hand 
+
+Scimitar item ID 55 (55 00 00 00)
+
+starting with scimitar in left hand in PRIMARY weapon, no shield, other tabs empty 
+
+11:58:19p  SENT: 60 
+11:58:19p  RECV:  97
+                     vv       ITEM ID----    PLAYER ID-- x              x   x
+11:58:19p  RECV:  9d 17 23 05 55 00 00 00 00 01 00 00 00 91 00 80 00 65 64 09 30 37 d6 06 02 06 01 00 53 58 58 74 f1 fc 07
+                  0  1  2  3  4  5  6  7  8  9  10 11 12 13
+
+ok, so if aPacket[13] & 0x80, item is switched OUT
+       if aPacket[13] & 0x40, item is switched IN
+
+weapon switched, now wielding nothing 
+
+11:58:35p  SENT: 60 
+11:58:36p  RECV:  97
+11:58:36p  RECV:  9d 17 23 05 55 00 00 00 00 01 00 00 00 51 00 80 00 65 84 08 30 37 d6 06 02 06 01 00 53 58 58 74 f1 fc 07
+
+weapon switched, now wielding the scimitar again 
+
+---------------
+now wielding 2 katars in tab 2 
+
+00:00:50a  SENT: 60 
+00:00:50a  RECV:  97
+00:00:50a  RECV:  9d 17 23 05 5a 00 00 00 00 01 00 00 00 91 00 80 00 65 64 03 b0 46 27 07 02 06 01 00 62 c0 c0 58 10 fc 07
+00:00:50a  RECV:  9d 17 21 05 59 00 00 00 00 01 00 00 00 91 00 80 00 65 84 01 b0 46 27 07 02 c6 00 18 98 09 02 fc 07
+00:00:50a  RECV:  9d 17 23 05 55 00 00 00 00 01 00 00 00 51 00 80 00 65 84 08 30 37 d6 06 02 06 01 00 53 58 58 74 f1 fc 07
+
+scimitar alone is now my weapon, tab 1 
+
+switching back to katars 
+00:01:17a  SENT: 60 
+00:01:17a  RECV:  97
+00:01:17a  RECV:  9d 17 23 05 55 00 00 00 00 01 00 00 00 91 00 80 00 65 64 09 30 37 d6 06 02 06 01 00 53 58 58 74 f1 fc 07
+00:01:17a  RECV:  9d 17 23 05 5a 00 00 00 00 01 00 00 00 51 00 80 00 65 84 02 b0 46 27 07 02 06 01 00 62 c0 c0 58 10 fc 07
+00:01:17a  RECV:  9d 17 21 06 59 00 00 00 00 01 00 00 00 51 00 80 00 65 a4 00 b0 46 27 07 02 c6 00 18 98 09 02 fc 07
+
+and back to scimitar 
+00:01:23a  SENT: 60 
+00:01:23a  RECV:  97
+00:01:23a  RECV:  9d 17 23 05 5a 00 00 00 00 01 00 00 00 91 00 80 00 65 64 03 b0 46 27 07 02 06 01 00 62 c0 c0 58 10 fc 07
+00:01:23a  RECV:  9d 17 21 05 59 00 00 00 00 01 00 00 00 91 00 80 00 65 84 01 b0 46 27 07 02 c6 00 18 98 09 02 fc 07
+00:01:23a  RECV:  9d 17 23 05 55 00 00 00 00 01 00 00 00 51 00 80 00 65 84 08 30 37 d6 06 02 06 01 00 53 58 58 74 f1 fc 07
+

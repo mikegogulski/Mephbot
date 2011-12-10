@@ -1,0 +1,468 @@
+Mephbot version 0.91 by Syadasti
+
+Copyright (c) 2002 by Mike Gogulski
+
+PLEASE READ THIS ENTIRE FILE AND FOLLOW THE DIRECTIONS BEFORE CONTACTING ME
+FOR HELP.
+
+PLEASE READ README.TXT BEFORE CONTACTING ME FOR HELP.
+
+PLEASE READ THE MEPHBOT SUPPORT THREADS IN THE D2 BOTS FORUM AT
+http://www.blizzhackers.com/ BEFORE CONTACTING ME FOR HELP.
+
+Mephbot is a work in progress.  Don't expect miracles of it (or of me).
+
+Latest version and updates available from:
+
+http://www.otaku-elite.com/syadasti
+
+------------------------------------------------------------------------------
+Credits
+------------------------------------------------------------------------------
+
+Mephbot is free software.  Redistribution is freely permitted, provided that
+full source code is included, and original credits retained.  You may not
+sell, rent, lease, or otherwise take money for the distribution of any part
+of Mephbot.
+
+Based on original code by MozartMcLaus, FallNAngel, Mousepad, ackmed, thohell,
+Gayak, g0llum, icky, Onlyer, YobGuls, druttis, Cigamit, masterste0,
+Herzog_Zwei, and others.
+
+Includes PrcView v 3.6.2.1 command line utility by Igor Nys
+
+Includes MString - Dynamic string data type library Copyright (C) 2001 by
+Jesse L. Lovelace (jllovela@eos.ncsu.edu)
+
+
+BIG THANK YOUS to the Mephbot Alpha testing team:
+
+Gayak, Karia Iachi (for hosting as well), Guillaume (Sharantyr),
+x-aumix@USWest, berto, Eric (Taiwan), Talon60k, studchris@USWest
+yoda-ak@USWest, blackcore@USEast, yup_thatsme, hAlo, Nathan W., Don
+lotusa@USWest, Aukid
+
+And to all the good people who grabbed the first betas at Blizzhackers.com,
+for your support, feedback, and contributions.
+
+I couldn't have done it without you!
+
+------------------------------------------------------------------------------
+What is Mephbot?
+------------------------------------------------------------------------------
+
+Mephbot is a set of programs which work together to automate the "magic find by 
+killing Mephisto repeatedly" task of advanced Diablo II players on Battle.net.
+
+         ***********************************************************
+         *** MEPHBOT IS NOT RECOMMENDED FOR HARDCORE CHARACTERS! ***
+	 ***   You'll die, you'll be sorry, it'll be your fault  ***
+         ***********************************************************
+
+------------------------------------------------------------------------------
+Requirements
+------------------------------------------------------------------------------
+
+Diablo II: Lord of Destruction (Classic is NOT supported)
+IBM PC-compatible (Macs not supported)
+Sorceress (Other classes not supported)
+
+Mephbot is built around my Sorceress build, but should be configurable for
+use by any type of sorceress with sufficient skill development and good 
+allocation of stat points.
+
+REQUIRED SPELLS:
+
+	Static Field
+	Teleport
+
+If you do not have these spells, Mephbot will fail with a "Connection
+Interrupted" message.
+
+Mephbot optionally uses weapon switch when Mephisto is about to die, so you
+should have something with good MF in there (I use an IST-IST Blade of Alibaba
+and an IST-IST-IST shield) if you're going to use it.
+
+My current setup includes:
+
+	Level 35 Frozen Orb
+	Level 18 Static Field
+	Level 15 Shiver Armor
+	Level 15 Thunderstorm
+	Level 35 Nova
+	Level 15 Teleport
+	About 600% magic find from items and charms
+	1007 life
+	1280 mana
+
+------------------------------------------------------------------------------
+Files included with this package
+------------------------------------------------------------------------------
+
+	mephbot.exe
+	mephbot.aut
+
+		Mephbot wrapper.  This is the bit that starts D2, loads
+		d2hackit, logs into battle.net, selects your character, and
+		then hands off control to Mephbot proper.  Requires
+		mephbot.ini, included, WHICH YOU MUST EDIT as described
+		below. 
+		
+		Mephbot.exe is a compiled AutoIT script.  You can decompile
+		the script to see what it does using the full version of
+		AutoIT, available from http://www.hiddensoft.com/AutoIt/
+		Source code is also included in mephbot.aut
+
+		IF YOU EVER FIND A VERSION OF MEPHBOT THAT HAS AN ENCRYPTED
+		MEPHBOT.EXE that you can't decompile, IT DID NOT COME FROM ME,
+		and is probably infected with a virus/keylogger or some other
+		piece of evil code like SubSeven or NetDevil, aimed at
+		obtaining your passwords and access to your computer.
+		DO NOT RUN THESE!!!  Also, check the md5 checksum information
+		at the end of this document.
+
+	mephbot.d2h
+	mephbot.ini
+
+		The guts of Mephbot.  Requires mephbot.ini, included,
+		WHICH YOU MUST EDIT as described below.
+		
+	pickit.d2h
+	pickit*.ini
+
+		Automatic item pickup module by Gayak.  Comes with my own
+		customized pickit.ini, configured to pick up only valuable
+		items.  YOU SHOULD EDIT THIS FILE TO YOUR OWN TASTE. Refer
+		to http://gayak.50megs.com/ for more information
+
+	loader.exe
+	d2hackit.dll
+	d2hackit.ini
+
+		Thohell's d2hackit plugin framework, version 0.56
+
+	pv.exe
+
+		PRCView, utility used to kill the Diablo II process when
+		necessary.
+
+	src\*.*
+
+		Source code, header files, and Microsoft Visual C++ project
+		and workspace files for mephbot.d2h and the Mephbot wrapper,
+		mephbot.exe.  Also includes source for PKTK code linked into
+		Mephbot, and the MString freeware CString replacement library.
+		You will need the Microsoft Windows Platform SDK to compile
+		Mephbot (requires IP Helper API).
+
+------------------------------------------------------------------------------
+Installation
+------------------------------------------------------------------------------
+
+Unpack the ZIP file to a directory of its own.  DO NOT UNPACK INTO YOUR
+D2HACKIT OR DIABLO II DIRECTORIES!  YOU WILL BE SORRY if you do this!
+
+Also, if you are upgrading from a previous version of Mephbot, do not unpack
+the archive into the same folder as your previous installation.  Create a
+new folder.
+
+Mephbot is not compatible with some D2 no-CD loaders.  Onlyer's works.
+http://onlyer.yeah.net/ (This is the loader that comes with Infinite
+Pindlebot)
+
+------------------------------------------------------------------------------
+Configuration           *** VERY IMPORTANT ***
+------------------------------------------------------------------------------
+
+Open mephbot.ini in Notepad or your favorite text editor.
+
+Select your character slot under [_global_], and in that slot configure the
+account name and password.    You will need to enter your Battle.net account
+name, password, and the character number (position in the character selection
+screen). See instructions in mephbot.ini for more information.
+
+Configure the parameters:
+
+ProtectionSkill1=Thunder Storm
+ProtectionSkill2=Energy Shield
+ProtectionSkill3=Shiver Armor
+ProtectionSkill4=
+ProtectionSkill5=
+ProtectionSkill6=
+ProtectionSkill7=
+ProtectionSkill8=
+PrimaryAttackSkill=Frozen Orb
+PrimaryAttackHand=Left
+SecondaryAttackSkill=Telekinesis
+SecondaryAttackHand=Right
+FastCastPercent=50
+DelayStep=10
+
+See the instructions in mephbot.ini for an explanation of all of these.
+
+These are the options I was using at the time of release, and may not be the
+best for you.  My Sorceress wears 30% faster run/walk gear, so if yours has
+less you may need to increase the DelayStep option.
+
+IMPORTANT NOTE for Sorcs who are using Lightning, Chain Lightning, or Inferno:
+
+	These spells aren't affected by fast cast, but by increased attack
+	speed.  IAS is not currently directly supported.  Set
+	FastCastPercent to zero for trouble-free (but suboptimal) operation,
+	or to your actual fast cast % or your IAS % and hope for the best.
+
+Optionally configure the parameters:
+
+MephMinHealthToCastStatic=50
+MephWeaponSwitchHealth=10
+ChickenLifePercent=20
+ComboChickenLifePercent=40
+ComboChickenManaPercent=10
+MinManaPercentBeforeAttackRun=70
+AwayMessage=
+StashVisitGameNumber=5
+MinDistanceToMeph=8
+MaxDistanceToMeph=15
+
+See the instructions in mephbot.ini for an explanation of all of these.
+
+	*** NOTE THAT THESE DELAYS ARE IN TENTHS OF A SECOND ***
+
+See the comments throughout mephbot.ini for information on what the other
+parameters do. 
+
+------------------------------------------------------------------------------
+Operation
+------------------------------------------------------------------------------
+
+Before starting Mephbot, make sure that your character is ready to go:
+
+	Start D2
+	Log in
+	Select the char that's going to do Meph runs with Mephbot
+	Create a game in the difficulty you want the bot to run
+	Make sure you have at least 5000 gold between your inventory and stash
+	Drink, sell, store, or drop all your mana and rejuv potions
+	Make sure your Horadric Cube is in the stash, NOT in inventory
+	Clear your inventory, cube, and stash out as much as possible
+	Make sure your weapon switch is set to your primary (attacking) weapon.
+	Make sure character is in Run (not Walk) mode
+	Waypoint to Act 3 Kurast docks
+	Exit game
+	Close D2
+
+
+To start Mephbot:
+
+	Close D2 (if it's running)
+	Open the Mephbot folder
+	Double-click mephbot.exe
+	Don't touch the keyboard or mouse until the D2 window minimizes itself
+
+
+Mephbot commands
+
+	.mephbot debug
+
+		Toggles debugging log on/off.  Debug output gets sent to the
+		file configured in mephbot.ini, and to the screen.  Debug
+		output is voluminous, and configurable in the INI.
+
+	.mephbot quitgame
+
+		Immediately exit the current game.
+
+	.unload mephbot
+
+		Unload the module.  Not recommended.  May cause crashes.
+		Not supported.
+
+	I suggest using thohell's bind.d2h plugin to create keyboard shortcuts
+	for these commands.
+
+------------------------------------------------------------------------------
+Managing Mephbot
+------------------------------------------------------------------------------
+
+	Mephbot is designed to detect and correct for all manner of game
+	crashes, disconnects, and unexpected conditions.  You may see the D2
+	window close and get restarted periodically because of this.  The
+	small utility "pv.exe" is used to kill the D2 process when this
+	occurs.  When the game is restarted, please leave the keyboard and 
+	mouse alone until the D2 window minimizes itself.
+
+Quitting Mephbot
+
+***	To quit Mephbot, press ALT-TAB to get back to Windows if you're in
+	full-screen mode.  Locate the AutoIT icon in the system tray (blue "A"
+	on a black background).  Right-click the tray icon and select Exit.
+	Then kill D2 using Task Manager.
+
+Statistics
+
+	Mephbot will log statistics on a per-invocation basis to
+	mephbot-stats.ini in the Mephbot directory.
+
+Debug log file
+
+	If you have debugging enabled, Mephbot will output the debug messages
+	you specify with DebugLevel= into the mephbotlog.txt file in the
+	Mephbot directory.  See mephbot.ini for more information.
+
+------------------------------------------------------------------------------
+What happens when... ?
+------------------------------------------------------------------------------
+
+Mephbot starts
+
+	Mephbot's basic order of operations is thus:
+
+		Start D2
+		Log in
+		Select character
+		Join random channel
+		Set configurable away message
+		Create game
+		Walk to Ormus
+		Fill belt with Super Healing potions
+		Deposit gold and unid'd items in stash and cube every so often
+		Take waypoint to Durance 2
+		Find stairs
+		Take stairs to Durance 3
+		Wait for mana recovery if necessary
+		Teleport to Meph
+		Kill Meph
+		Teleport to Meph's corpse
+		Wait for item pickup
+		Exit
+		Restart
+
+	When an item's durability falls below 10%, Mephbot will	visit Hratli
+	to repair your character's equipment, and then restart.
+
+Player dies
+
+	Mephbot will detect this, resurrect the player, pick up the corpse,
+	clear the player inventory of potions, and then continue doing Meph
+	runs.  If you see your character dying a lot, increase your
+	chickening threshholds in mephbot.ini.
+
+Inventory fills up with Winforces and Grandfathers
+
+	Mephbot will detect the inventory full condition, and cease operation.
+	(If Mephisto begins dropping wfs and gfs, please let me know!)  This
+	behavior can be overridden by setting ContinueWhenInventoryFull=1
+	in mephbot.ini.
+
+Diablo II crashes
+
+	Mephbot will detect almost all types of D2 crashes and react to them.
+	What you will see is possibly a message box saying there's an error,
+	followed by a brief pause.  Then the box and D2 window will disappear,
+	and then D2 will restart.  You must keep hands off the mouse and 
+	keyboard until D2 minimizes again.
+
+------------------------------------------------------------------------------
+What's next?
+------------------------------------------------------------------------------
+
+Please see the file "mephbot-dev.txt" for an up-to-the-minute log of what I'm
+working on, what's new, known bugs, and what I'm thinking about for the next
+release.
+
+------------------------------------------------------------------------------
+How do I report bugs?
+------------------------------------------------------------------------------
+PLEASE READ THIS ENTIRE FILE AND FOLLOW THE DIRECTIONS BEFORE CONTACTING ME
+FOR HELP.
+
+PLEASE READ README.TXT BEFORE CONTACTING ME FOR HELP.
+
+PLEASE READ THE MEPHBOT SUPPORT THREADS IN THE D2 BOTS FORUM AT
+http://www.blizzhackers.com/ BEFORE CONTACTING ME FOR HELP.
+
+If you have followed ALL of the directions, and if you have reviewed ALL of 
+the Frequently Asked Questions in readme.txt, and if you have reviewed ALL of
+the Mephbot support information available in the D2 Bots forum at
+http://www.blizzhackers.com/, then you may send me a bug report.
+
+Please report bugs to me at mike@gogulski.com.
+
+In your bug reports, please include:
+
+	A description of the problem
+
+	Your system specifications (CPU, speed, RAM, graphics card, OS)
+
+	A description of your character (level, life, mana, skill levels,
+	equipment, game difficulty level, stats)
+
+	mephbot.ini
+
+	The Mephbot debug file section for the game that you saw the problem in
+
+And, if the problem is causing D2 to crash:
+
+	In mephbot.ini, set DebugLevel=1023 and Debug=1 
+
+	Delete mephbotlog.txt 
+	
+	Go into your Diablo II directory and delete all of the "D20*.txt"
+	files 
+	
+	Run mephbot.exe 
+	
+	When the game starts, kill the AutoIT wrapper as described above
+	
+	When the game crashes, press "OK" in the "Diablo II Exception"
+	dialogue when the error appears
+
+	Then, send me an email containing a ZIP of: 
+
+	- Your mephbot.ini (take out your passwords) 
+	- Your mephbot-stats.ini 
+	- Your mephbotlog.txt 
+	- The file in the Diablo II directory named "D20(whatever).txt"
+	  (file for the current date) 
+
+------------------------------------------------------------------------------
+Legalese
+------------------------------------------------------------------------------
+Mephbot is free software.  Redistribution is freely permitted, provided that
+full source code is included, and original credits retained.  You may not
+sell, rent, lease, or otherwise take money for the distribution of any part
+of Mephbot.
+
+Battle.net, Diablo II, and Diablo II: Lord of Destruction are registered
+trademarks of Blizzard Entertainment.
+Diablo II and Diablo II: Lord of Destruction are Copyright (c) by Blizzard
+Entertainment
+AutoIT is Copyright (c) 2002 by Jonathan Bennett.
+PrcView is Copyright (c) by Igor Nys.
+MString is Copyright (c) 2001 by Jesse L. Lovelace (jllovela@eos.ncsu.edu)
+
+I have nothing to do whatsoever with any of the above companies and
+individuals.
+
+All third-party d2h modules are Copyright (c) by their respective authors.
+
+I make no warranties, expressed or implied, whatsoever, with regard to this
+software.  If Blizzard cancels your account, you lose your Windforce, or your
+computer explodes in a tower of flame, don't come crying to me.
+
+YOU USE MEPHBOT AT YOUR OWN RISK.
+
+------------------------------------------------------------------------------
+md5sum information
+------------------------------------------------------------------------------
+
+md5sums for executables in this distribution:
+
+a18c4bbd5c8c3672cea6bc559e7da049 *D2HackIt.dll
+9f69f7b0571817d0d6f334bb82710f4b *d2kill.exe
+10b7191ab52720c54f989cdb33d47617 *Loader.exe
+ed448825e4dab47d8110ae0e2b7413e1 *mephbot.d2h
+27af07df05b7afacfa39ab2f6d0633fe *mephbot.exe
+9db038e9d278ef25663be046c858eee3 *pickit.d2h
+bbd176033efd0c796fc3c65a8f67ad26 *pv.exe
+

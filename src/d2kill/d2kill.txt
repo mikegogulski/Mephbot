@@ -1,0 +1,16 @@
+EXPERIMENTAL
+
+d2kill.exe is a small DOS application that will kill the running
+D2 process(es).  It is intended for those people experiencing problems
+with PrcView (pv.exe) under Windows 98 and Windows ME.
+
+To install, place d2kill.exe in your mephbot directory.
+
+In mephbot.ini, comment out the existing "D2Kill=" line by placing a
+semicolon (;) in front of it, and add this line immediately below:
+
+D2Kill=d2kill.exe
+
+Please let me know how it works.
+
+Mike Gogulski <mike@gogulski.com>

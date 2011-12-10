@@ -1,0 +1,430 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; COPYRIGHT
+;;
+;; This program is Copyright (c) 2002 by Mike Gogulski <mike@gogulski.com>
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Syadasti's open-source human-readable software LICENSE
+;;
+;; This code is freely redistributable, provided that all credits and
+;; copyright notices are preserved.
+;;
+;; You may use this code in your own software without restriction, provided
+;; that your software is distributed with complete source code.
+;;
+;; You agree by making use of this code that whatever problems you experience
+;; as a result are your fault, and yours alone.
+;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; mephbot for Sorceress v0.91 by Syadasti
+; Wrapper based on Infinite Pindlebot v3.3 by Mozart McLaus and Fallnangel
+; FORBIDDEN CLICK AREA (DELETE CHARACTER BUTTON) X: 435-605 Y: 495-560
+
+;=============================================================================
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>> INITIALIZATION >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+;=============================================================================
+
+;// INITIALIZE GLOBALS
+
+SetEnv, Version, 0.91
+
+SetBatchLines, 100
+
+SetEnv, IniFileName, %A_SCRIPTDIR%\\mephbot.ini
+SetEnv, StatsFileName, %A_SCRIPTDIR%\\mephbot-stats.ini
+SetEnv, InGameFileName, %A_SCRIPTDIR%\\mephbot-ingame.tmp
+SetEnv, InvFullFileName, %A_SCRIPTDIR%\\mephbot-invfull.tmp
+SetEnv, WrongActFileName, %A_SCRIPTDIR%\\mephbot-wrongact.tmp
+
+;; set MephbotDir automatically
+IniWrite, %A_SCRIPTDIR%, %IniFileName%, default, MephbotDir
+
+IniRead, Debug, %IniFileName%, default, Debug
+
+IniRead, DebugFileTmp, %IniFileName%, default, LogFileName
+SetEnv, DebugFile, %A_SCRIPTDIR%\\%DebugFileTmp%
+
+SetEnv, DebugInfo, --------------------------WRAPPER-STARTED---------------------------------
+Gosub, Dprint
+
+SetEnv, DebugInfo, Mephbot version %Version% wrapper started on %A_OSVERSION%
+Gosub, Dprint
+
+SetEnv, RunName, %A_YEAR%%A_MON%%A_MDAY%%A_HOUR%%A_MIN%%A_SEC%
+IniWrite, %RunName%, %StatsFileName%, current_run, RunName
+
+SetEnv, DebugInfo, Run name: %RunName%
+Gosub, Dprint
+
+IniRead, SlotName, %IniFileName%, _global_, DefaultSlot
+IniRead, Sound, %IniFileName%, default, Sound
+IfEqual, Sound, 0, SetEnv, SoundOption, -ns
+IniRead, Windowed, %IniFileName%, default, Windowed
+IfEqual, Windowed, 1, SetEnv, WindowedOption, -w
+IniRead, MoveWindowToTopLeftCorner, %IniFileName%, default, MoveWindowToTopLeftCorner
+
+;// EXPERT SETTINGS
+IniRead, D2Path,       %IniFileName%, _expert_, D2Path
+IfEqual, D2Path, , RegRead, D2Path, REG_SZ, HKEY_CURRENT_USER, Software\\Blizzard Entertainment\\Diablo II, InstallPath
+IniRead, D2Executable, %IniFileName%, _expert_, D2Executable
+IfEqual, D2Executable, , SetEnv, D2Executable, Diablo II.exe
+IniRead, D2Suffix,     %IniFileName%, _expert_, D2Parameter
+IniRead, D2Title,      %IniFileName%, _expert_, D2Title
+IniRead, D2Kill,       %IniFileName%, _expert_, D2Kill
+IniRead, D2HackItPath, %IniFileName%, _expert_, D2HackIt
+
+;// EXPERT SETTINGS: TIMING
+IniRead, dClick, %IniFileName%, _expert_, dClick
+IniRead, dStartDiablo, %IniFileName%, _expert_, dStartDiablo
+IniRead, dAccLogin, %IniFileName%, _expert_, dAccLogin
+IniRead, dCharLogin, %IniFileName%, _expert_, dCharLogin
+IniRead, dHackItStart, %IniFileName%, _expert_, dHackItStart
+IniRead, dCloseDiablo, %IniFileName%, _expert_, dCloseDiablo
+IniRead, dWaitUserClose, %IniFileName%, _expert_, dWaitUserClose
+IniRead, dChannelAction, %IniFileName%, _expert_, dChannelAction
+
+;RegWrite, REG_DWORD, HKEY_CURRENT_USER, Software\\Blizzard Entertainment\\Diablo II, Resolution, 1
+;RegWrite, REG_DWORD, HKEY_CURRENT_USER, Software\\Blizzard Entertainment\\Diablo II, Options Music, 0
+
+Gosub, ReadSlot
+
+IfEqual, accpass, , Gosub, EnterPass
+
+;=============================================================================
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> MAIN SECTION >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+;=============================================================================
+
+Start:
+
+IfExist, %InvFullFileName%, Gosub, DeleteInvFullFile
+IfExist, %WrongActFileName%, Gosub, DeleteWrongActFile
+
+SplashTextOn, 200, 100, Mephbot %Version% logging in, Please leave the keyboard and mouse alone until this message disappears.
+WinMove, Mephbot %Version% logging in,, 824, 0, default, default
+
+Gosub, StartDiablo
+
+Gosub, LogIntoAcc
+
+Gosub, CheckWindowState
+
+Gosub, SelectChar
+
+Gosub, CheckWindowState
+
+Gosub, PerformChatActions
+
+Gosub, CheckWindowState
+
+Gosub, StartD2HackIt
+
+Gosub, CheckWindowState
+
+SplashTextOff
+
+SetEnv, Tick, 0
+
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> MAIN LOOP >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+MainLoopStart:
+
+EnvAdd, Tick, 1
+
+;; We just exit if inventory full
+IfExist, %InvFullFileName%, Goto, InventoryFull
+
+;; We just exit if game started in wrong act
+IfExist, %WrongActFileName%, Goto, WrongAct
+
+;; if we've waited 90 seconds and the d2h module hasn't started a game, bail.
+IfGreater, Tick, 90, Goto, GameNotStarted
+
+Gosub, CheckDiabloState
+
+Sleep, 1000
+
+Goto, MainLoopStart
+
+;<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< MAIN LOOP END <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+;=============================================================================
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>> CONTROL FUNCTIONS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+;=============================================================================
+
+CheckWindowState:
+
+	IfWinNotActive, %D2Title%, , Sleep, %dWaitUserClose%
+	IfWinNotActive, %D2Title%, , Goto, IWantToRestart
+
+CheckDiabloState:
+
+	IfWinNotExist, %D2Title%, , Goto, IWantToRestart
+
+	IfExist, %InGameFileName%, SetEnv, Tick, 0
+
+	IfWinExist, Diablo II Exception, , Goto, ExceptionWindow
+	IfWinExist, Diablo II Error, , Goto, ExceptionWindow
+	IfWinExist, Loader Error!, , Goto, ExceptionWindow
+	IfWinExist, D2Loader Error!, , Goto, ExceptionWindow
+	IfWinExist, D2Loader Exception, , Goto, ExceptionWindow
+	IfWinExist, D2Loader Error, , Goto, ExceptionWindow
+	;; we see the "Hey guys" window when D2 traps access violations and other nastiness
+	IfWinExist, Hey guys, , Goto, ExceptionWindow
+	IfWinExist, Microsoft Visual C++ Debug Library, , Goto, ExceptionWindow
+
+	Return
+
+CloseAllWindows:
+
+	SetEnv, DebugInfo, Closing all windows (%A_SCRIPTDIR%\\%D2Kill%)
+	Gosub, Dprint
+	WinClose, Diablo II Exception
+	WinClose, Diablo II Error
+	WinClose, Loader Error
+	WinClose, D2Loader Error
+	WinClose, D2Loader Exception
+	WinClose, D2Loader Error
+	WinClose, Hey guys
+	WinClose, Microsoft Visual C++ Debug Library
+	WinClose, Game
+	WinClose, Diablo
+	WinClose, D2Loader
+	WinClose, %D2Title%
+	WinKill, Diablo II Exception
+	WinKill, Diablo II Error
+	WinKill, Loader Error
+	WinKill, D2Loader Error
+	WinKill, D2Loader Exception
+	WinKill, D2Loader Error
+	WinKill, Hey guys
+	WinKill, Microsoft Visual C++ Debug Library
+	WinKill, Game
+	WinKill, Diablo
+	WinKill, D2Loader
+	WinKill, %D2Title%
+	Sleep, %dCloseDiablo%
+	IfNotEqual, D2Kill, , RunWait, %A_SCRIPTDIR%\\%D2Kill%
+	Sleep, %dCloseDiablo%
+
+	Return
+
+ExceptionWindow:
+
+	SetEnv, DebugInfo, Diablo II threw an exception
+	Gosub, Dprint
+; allow time for Diablo to write debug data to disk
+	Sleep, 5000
+	Goto, IWantToRestart
+
+GameNotStarted:
+
+	SetEnv, DebugInfo, Game not started after 60 seconds, restarting Diablo II
+	Gosub, Dprint
+	Goto, IWantToRestart
+
+InventoryFull:
+
+	SetEnv, DebugInfo, Inventory full, wrapper exiting
+	Gosub, Dprint
+	Goto, IWantToQuit
+
+WrongAct:
+
+	SetEnv, DebugInfo, Game started in wrong act, wrapper exiting
+	Gosub, Dprint
+	Goto, IWantToQuit
+
+IWantToRestart:
+
+	SetEnv, DebugInfo, Restarting Diablo II
+	Gosub, Dprint
+
+	IfExist, %InGameFileName%, Gosub, DeleteInGameFile
+	;; increment NumRestarts when we are restarting
+	IniRead, NumRestarts, %StatsFileName%, %RunName%, NumRestarts
+	EnvAdd, NumRestarts, 1
+	IniWrite, %NumRestarts%, %StatsFileName%, %RunName%, NumRestarts
+	Gosub, CloseAllWindows
+	Goto, Start
+
+IWantToQuit:
+
+	SetEnv, DebugInfo, Quitting Mephbot wrapper
+	Gosub, Dprint
+
+	SetEnv, DebugInfo, --------------------------WRAPPER-EXITING---------------------------------
+	Gosub, Dprint
+
+	Gosub, CloseAllWindows
+	Exit
+
+
+;=============================================================================
+;>>>>>>>>>>>>>>>>>>>>>>>>>>>>> SUBFUNCTIONS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+;=============================================================================
+DeleteInvFullFile:
+
+	SetEnv, DebugInfo, Deleting %InvFullFileName%
+	Gosub, Dprint
+
+	RunWait, %COMSPEC% /c del mephbot-invfull.tmp
+	Return
+
+DeleteWrongActFile:
+
+	SetEnv, DebugInfo, Deleting %WrongActFileName%
+	Gosub, Dprint
+
+	RunWait, %COMSPEC% /c del mephbot-wrongact.tmp
+	Return
+
+DeleteInGameFile:
+
+	SetEnv, DebugInfo, Deleting %InGameFileName%
+	Gosub, Dprint
+
+	RunWait, %COMSPEC% /c del mephbot-ingame.tmp
+	Return
+
+ReadSlot:
+
+	ReadSlotStart:
+
+	SetEnv, tmpStatus, _UNSET_
+
+	IfEqual, SlotName, , InputBox, SlotName, Mephbot %Version%, ENTER SLOT NAME TO USE IN MEPHISTO RUNS
+
+	IniRead, accname, %IniFileName%, %SlotName%, Accountname
+	IfEqual, accname, ERROR, SetEnv, tmpStatus, _ERROR_
+
+	IniRead, accpass, %IniFileName%, %SlotName%, Password
+	IfEqual, accpass, ERROR, SetEnv, tmpStatus, _ERROR_
+
+	IniRead, actchar, %IniFileName%, %SlotName%, CharacterLocation
+	IfEqual, actchar, ERROR, SetEnv, tmpStatus, _ERROR_
+
+	IfEqual, tmpStatus, _ERROR_, MsgBox, 0, Error, Slot doesnt exist or damaged. Check mephbot.ini configuration.
+	IfEqual, tmpStatus, _ERROR_, SetEnv, SlotName, 
+	IfEqual, tmpStatus, _ERROR_, Goto, ReadSlotStart
+
+	Return
+
+EnterPass:
+
+	EnterPasswordStart:
+	SetEnv, DebugInfo, Asking for password
+	Gosub, Dprint
+
+	InputBox, temp, Password required, Enter the password for account %AccName% ,hide
+	InputBox, accpass, Reenter password, Reenter the password for account %AccName% ,hide
+	IfNotEqual, temp, %accpass%, MsgBox, 0, Error, Passwords dont match... Please reenter
+	IfNotEqual, temp, %accpass%, Goto, EnterPasswordStart
+
+	Return
+
+StartDiablo:
+
+	IfWinExist, %D2Title%, , Goto, IWantToRestart
+	
+	SetEnv, DebugInfo, Starting Diablo II (%D2Path%\\%D2Executable% %WindowedOption% %D2Suffix% %SoundOption%)
+	Gosub, Dprint
+
+	Run, %D2Path%\\%D2Executable% %WindowedOption% %D2Suffix% %SoundOption%, %D2Path%
+	WinWaitActive, %D2Title%, , 10
+	IfEqual, MoveWindowToTopLeftCorner, 1, WinMove, %D2Title%, , 0, 0, default, default
+
+	Sleep, %dStartDiablo%
+
+	Gosub, CheckDiabloState
+
+	Return
+
+LogIntoAcc:
+
+	SetEnv, DebugInfo, Logging into account %accname%
+	Gosub, Dprint
+
+	Send, {TAB}
+	SetEnv, clipboard, %accname%
+	Send, ^{V}
+	Sleep, %dClick%
+	Send, {TAB}
+	Sleep, %dClick%
+	SetEnv, clipboard, %accpass%
+	Send, ^{V}
+	Sleep, %dClick%
+	Send, {ENTER}
+	Sleep, %dAccLogin%
+
+	SetEnv, clipboard, _UNSET_
+
+	Gosub, CheckDiabloState
+
+	Return
+
+SelectChar:
+
+	SetEnv, DebugInfo, Selecting character number %actchar%
+	Gosub, Dprint
+
+	IfEqual, actchar, 2, Send, {RIGHT}
+	IfEqual, actchar, 3, Send, {DOWN}
+	IfEqual, actchar, 4, Send, {RIGHT}{DOWN}
+	IfEqual, actchar, 5, Send, {DOWN}{DOWN}
+	IfEqual, actchar, 6, Send, {RIGHT}{DOWN}{DOWN}
+	IfEqual, actchar, 7, Send, {DOWN}{DOWN}{DOWN}
+	IfEqual, actchar, 8, Send, {RIGHT}{DOWN}{DOWN}{DOWN}
+	Sleep, %dClick%
+	Send, {ENTER}
+	Sleep, %dCharLogin%
+
+	Gosub, CheckDiabloState
+
+	Return
+
+PerformChatActions:
+
+	SetEnv, DebugInfo, Performing chat actions
+	Gosub, Dprint
+
+	Random, c1, 10000, 32767
+	Random, c2, 10000, 32767
+	Random, c3, 10000, 32767
+	SetEnv, channel, %c1%%c2%%c3%
+	SetEnv, clipboard, /join %channel%
+	Send, ^{V}
+	Sleep, %dClick%
+	Send, {ENTER}
+	Sleep, %dChannelAction%
+
+	Gosub, CheckDiabloState
+
+	Return
+
+
+StartD2HackIt:
+
+	SetEnv, DebugInfo, Starting d2hackit (%A_SCRIPTDIR%\\%D2HackItPath%)
+	Gosub, Dprint
+
+	Run, %A_SCRIPTDIR%\\%D2HackItPath%
+	Sleep, %dHackItStart%
+
+	Gosub, CheckDiabloState
+
+	Return
+
+Dprint:
+
+;; variable DebugInfo must be set when calling this function
+	
+	StringRight, Year, A_YEAR, 2
+	IfEqual, Debug, 1, FileAppend, %A_MON%/%A_MDAY%/%Year% %A_HOUR%:%A_MIN%:%A_SEC% wrapper: %DebugInfo%\n, %DebugFile%
+
+	Return
+
